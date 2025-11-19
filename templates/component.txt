@@ -1,0 +1,10 @@
+{{styleImport}}
+const {{pascalName}} = ({{props}}) => {
+    return (
+        <div className="{{className}}">
+            $0
+        </div>
+    );
+};
+
+export default {{pascalName}};

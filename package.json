@@ -1,0 +1,55 @@
+{
+  "name": "react-component-snippets",
+  "displayName": "React Component Snippets + Generator",
+  "description": "Snippets and a command to quickly generate React components (CSS, SCSS, Tailwind, Simple).",
+  "version": "0.1.0",
+  "publisher": "Ryan Carter",
+  "engines": {
+    "vscode": "^1.106.0"
+  },
+  "categories": [
+    "Snippets",
+    "Other"
+  ],
+  
+  "icon": "icon.png",
+
+  "main": "./out/extension.js",
+  
+  "files": [
+    "out",
+    "snippets",
+    "templates"
+  ],
+
+  "contributes": {
+    "commands": [
+      {
+        "command": "rcs.generateComponent",
+        "title": "Generate React Component"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "javascriptreact",
+        "path": "./snippets/react-snippets.json"
+      },
+      {
+        "language": "typescriptreact",
+        "path": "./snippets/react-snippets.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "@vscode/vsce package"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.10.1",
+    "@types/vscode": "^1.106.1",
+    "@vscode/vsce": "^2.15.0" 
+  }
+}

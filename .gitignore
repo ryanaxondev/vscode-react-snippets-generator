@@ -1,0 +1,46 @@
+# -------------------------
+# Node / Dependency Artifacts
+# -------------------------
+/node_modules
+/package-lock.json
+/pnpm-lock.yaml
+/npm-debug.log*
+/yarn.lock
+/pnpm-debug.log*
+
+# -------------------------
+# Compilation and Output
+# -------------------------
+# TypeScript compilation output folder
+/out/
+# If any JS files exist outside of 'out' (usually not recommended)
+*.js.map
+*.js
+# TypeScript cache
+/.tsbuildinfo
+
+# -------------------------
+# VS Code Extension Specific
+# -------------------------
+# Compiled VSIX package files
+*.vsix
+# Tokens/Publisher settings used for publishing (CRITICAL TO IGNORE)
+.vscode-test
+.vsix
+.vscode-test-web
+
+# -------------------------
+# OS / Editor Specific Files
+# -------------------------
+# Logs
+logs
+*.log
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VS Code temporary files
+.vscode/*.log

@@ -1,0 +1,69 @@
+{
+  "React Component (CSS)": {
+    "scope": "javascriptreact,typescriptreact",
+    "prefix": "rcc",
+    "body": [
+      "import './${TM_FILENAME_BASE/(.*)/${1:/downcase}/}.css';",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(?:^|[-_])([a-z])/${1:/upcase}/g}} = () => {",
+      "  return (",
+      "    <div className='${TM_FILENAME_BASE/(.*)/${1:/downcase}/}'>",
+      "      ${0}",
+      "    </div>",
+      "  );",
+      "};",
+      "",
+      "export default ${1};"
+    ],
+    "description": "Create a React component with CSS import"
+  },
+
+  "React Component (SCSS)": {
+    "scope": "javascriptreact,typescriptreact",
+    "prefix": "rcs",
+    "body": [
+      "import './${TM_FILENAME_BASE/(.*)/${1:/downcase}/}.scss';",
+      "",
+      "const ${1:${TM_FILENAME_BASE/(?:^|[-_])([a-z])/${1:/upcase}/g}} = () => {",
+      "  return (",
+      "    <div className='${TM_FILENAME_BASE/(.*)/${1:/downcase}/}'>",
+      "      ${0}",
+      "    </div>",
+      "  );",
+      "};",
+      "",
+      "export default ${1};"
+    ],
+    "description": "Create a React component with SCSS import"
+  },
+
+  "React Component (Tailwind)": {
+    "scope": "javascriptreact,typescriptreact",
+    "prefix": "rct",
+    "body": [
+      "const ${1:${TM_FILENAME_BASE/(?:^|[-_])([a-z])/${1:/upcase}/g}} = () => {",
+      "  return (",
+      "    <div className='${2:container}'>",
+      "      ${0}",
+      "    </div>",
+      "  );",
+      "};",
+      "",
+      "export default ${1};"
+    ],
+    "description": "Create a React component with Tailwind classes"
+  },
+
+  "React Component (Simple)": {
+    "scope": "javascriptreact,typescriptreact",
+    "prefix": "rc",
+    "body": [
+      "const ${1:${TM_FILENAME_BASE/(?:^|[-_])([a-z])/${1:/upcase}/g}} = () => {",
+      "  return <div>${0}</div>;",
+      "};",
+      "",
+      "export default ${1};"
+    ],
+    "description": "Simple React component"
+  }
+}
