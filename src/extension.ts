@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { loadTemplate, processTemplate } from './templateManager';
+import { logError, logInfo } from './logger';
 
 // ---------------------------------------------------------------
 // Utility: Read configuration values from `rcs.*`
@@ -10,7 +11,7 @@ function getConfiguration<T = any>(key: string): T {
 }
 
 // ---------------------------------------------------------------
-// Utility: Convert component names to PascalCase
+// Utility: Convert a string to PascalCase
 // ---------------------------------------------------------------
 function toPascalCase(name: string): string {
     return name
@@ -22,14 +23,18 @@ function toPascalCase(name: string): string {
 }
 
 // ---------------------------------------------------------------
-// Main Extension Activation
+// Extension Activation: Registers the main command
 // ---------------------------------------------------------------
 export function activate(context: vscode.ExtensionContext) {
     const disposable = vscode.commands.registerCommand(
         'rcs.generateComponent',
         async (uri?: vscode.Uri) => {
+            logInfo('Command "rcs.generateComponent" initiated.');
+
             try {
-                // Resolve target folder
+                // ---------------------------------------------------
+                // Resolve base folder
+                // ---------------------------------------------------
                 const baseUri = uri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
                 if (!baseUri) {
                     vscode.window.showErrorMessage(
@@ -39,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
                 // ---------------------------------------------------
-                // Decide whether to create a dedicated folder
+                // Determine folder creation behavior
                 // ---------------------------------------------------
                 const useFolderSetting = getConfiguration<string>('useFolder');
                 let shouldCreateFolder = false;
@@ -47,17 +52,17 @@ export function activate(context: vscode.ExtensionContext) {
                 if (useFolderSetting === 'always') {
                     shouldCreateFolder = true;
                 } else if (useFolderSetting === 'ask') {
-                    const choose = await vscode.window.showQuickPick(
+                    const pick = await vscode.window.showQuickPick(
                         ['Yes (Create folder)', 'No (Just files)'],
                         { placeHolder: 'Create a dedicated folder?' }
                     );
-                    if (!choose) return;
-                    shouldCreateFolder = choose.startsWith('Yes');
+                    if (!pick) return;
+                    shouldCreateFolder = pick.startsWith('Yes');
                 }
-                // if 'never': remain false
+                // If "never", it remains false
 
                 // ---------------------------------------------------
-                // Ask for component filename
+                // Ask user for component filename
                 // ---------------------------------------------------
                 let filename = await vscode.window.showInputBox({
                     prompt: 'Enter component filename (e.g. Navbar or UserCard.tsx)',
@@ -65,15 +70,13 @@ export function activate(context: vscode.ExtensionContext) {
                 });
                 if (!filename) return;
 
-                // Validate filename
+                // Validate filename characters
                 if (/[/\\?%*:|"<>]/.test(filename)) {
-                    vscode.window.showErrorMessage(
-                        'Filename contains invalid characters.'
-                    );
+                    vscode.window.showErrorMessage('Filename contains invalid characters.');
                     return;
                 }
 
-                // Normalize filename + extract extension
+                // Normalize filename & extension
                 let ext = path.extname(filename);
                 const baseName = path.basename(filename, ext);
 
@@ -86,14 +89,12 @@ export function activate(context: vscode.ExtensionContext) {
                 const lowerName = baseName.toLowerCase();
 
                 if (!/^[A-Za-z]/.test(pascalName)) {
-                    vscode.window.showErrorMessage(
-                        'Component name must start with a letter.'
-                    );
+                    vscode.window.showErrorMessage('Component name must start with a letter.');
                     return;
                 }
 
                 // ---------------------------------------------------
-                // Determine output directory
+                // Determine the output directory
                 // ---------------------------------------------------
                 let finalTargetUri = baseUri;
                 if (shouldCreateFolder) {
@@ -102,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
                 // ---------------------------------------------------
-                // Determine style type based on settings
+                // Determine style type from configuration
                 // ---------------------------------------------------
                 const defaultStyleSetting = getConfiguration<string>('defaultStyle');
                 let styleType: string | undefined;
@@ -113,46 +114,45 @@ export function activate(context: vscode.ExtensionContext) {
                         { placeHolder: 'Choose style type' }
                     );
                 } else {
-                    styleType = defaultStyleSetting; // direct: CSS | SCSS | Tailwind | None
+                    styleType = defaultStyleSetting;
                 }
 
                 if (!styleType) return;
 
                 // ---------------------------------------------------
-                // Prepare style file settings
+                // Prepare style output (if needed)
                 // ---------------------------------------------------
                 let styleFileName: string | null = null;
                 let styleContent = '';
                 let styleImport = '';
                 let className = lowerName;
 
-                // Tailwind behavior controlled by config
+                // Tailwind class configuration
                 if (styleType === 'Tailwind') {
                     const defaultTW = getConfiguration<string>('defaultTailwindClass');
-
                     const userInput = await vscode.window.showInputBox({
                         prompt: 'Enter Tailwind class',
                         value: defaultTW
                     });
-
                     className = userInput || defaultTW;
                 }
-                
+
                 // CSS / SCSS handling
                 else if (styleType !== 'None') {
                     const styleExt = styleType === 'SCSS' ? '.scss' : '.css';
                     styleFileName = `${lowerName}${styleExt}`;
                     styleImport = `import './${styleFileName}';\n`;
 
-                    const styleTemplateContent = await loadTemplate(
+                    const styleTemplate = await loadTemplate(
                         context,
                         `styles/${styleType.toLowerCase()}.txt`
                     );
-                    styleContent = processTemplate(styleTemplateContent, { lowerName });
+
+                    styleContent = processTemplate(styleTemplate, { lowerName });
                 }
 
                 // ---------------------------------------------------
-                // Generate component from template
+                // Generate component file from template
                 // ---------------------------------------------------
                 const componentTemplate = await loadTemplate(context, 'component.txt');
                 const componentContent = processTemplate(componentTemplate, {
@@ -163,13 +163,12 @@ export function activate(context: vscode.ExtensionContext) {
                     props: 'props'
                 });
 
-                // Final paths
                 const componentUri = vscode.Uri.joinPath(finalTargetUri, filename);
                 const styleUri = styleFileName
                     ? vscode.Uri.joinPath(finalTargetUri, styleFileName)
                     : null;
 
-                // Write component file
+                // Write component
                 await vscode.workspace.fs.writeFile(
                     componentUri,
                     new TextEncoder().encode(componentContent)
@@ -183,7 +182,7 @@ export function activate(context: vscode.ExtensionContext) {
                     );
                 }
 
-                // Open + auto-format
+                // Open file and auto-format
                 const doc = await vscode.workspace.openTextDocument(componentUri);
                 await vscode.window.showTextDocument(doc, {
                     preserveFocus: false,
@@ -192,13 +191,13 @@ export function activate(context: vscode.ExtensionContext) {
 
                 await vscode.commands.executeCommand('editor.action.formatDocument');
 
-                vscode.window.showInformationMessage(
-                    `Component ${pascalName} created successfully.`
-                );
+                // Success notification
+                vscode.window.showInformationMessage(`Component ${pascalName} created successfully.`);
+                logInfo(`Successfully created component: ${pascalName}.`);
+
             } catch (err: any) {
-                vscode.window.showErrorMessage(
-                    `Error creating component: ${err.message || String(err)}`
-                );
+                logError('Component generation failed.', err);
+                if (err?.name === 'AbortError') return;
             }
         }
     );
@@ -206,4 +205,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
 }
 
-export function deactivate() { }
+// ---------------------------------------------------------------
+// Extension Deactivation
+// ---------------------------------------------------------------
+export function deactivate() {}

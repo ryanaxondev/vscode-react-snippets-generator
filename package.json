@@ -2,7 +2,7 @@
   "name": "react-component-snippets",
   "displayName": "React Component Snippets + Generator",
   "description": "Snippets and a command to quickly generate React components (CSS, SCSS, Tailwind, Simple).",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "Ryan Carter",
   "engines": {
     "vscode": "^1.106.0"

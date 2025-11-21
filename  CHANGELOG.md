@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Planned improvements for error handling and output logging.
 - Planned Component Tree Generator feature.
 - Planned Props Builder and Next.js mode.
 
@@ -29,6 +28,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ---
+
+## [0.4.0] - 2025-11-21
+
+### Added
+- **Centralized Logging System**  
+  - Implemented `logger.ts` with a dedicated Output Channel named **"React Component Generator"**.
+  - Added logging helpers: `logInfo`, `logWarning`, `logError`.
+  - Automatic timestamps added to all log entries.
+  - Errors now include stack traces inside the Output Channel for easier debugging.
+
+### Changed
+- Updated `extension.ts` to use new centralized logging system instead of scattered `showErrorMessage`.
+- Replaced direct error messages with `logError` for unified error handling.
+
+### Improved
+- Enhanced developer experience during debugging.
+- Output Channel automatically reveals detailed failure context.
+- Prepared the groundwork for structured error classes (TemplateNotFoundError, InvalidNameError, etc.).
+
+### Fixed
+- Prevented silent failures when file writing or template resolution fails.
+
+### Removed
+- Removed redundant inline error notifications.
+
+### Security
+- N/A
 
 ## [0.3.0] - 2025-11-21
 
