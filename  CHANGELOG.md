@@ -29,6 +29,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] - 2025-11-21
+
+### Added
+- Advanced filename validation with detection of disallowed characters.
+- Component name validation to ensure PascalCase names start with a letter.
+- Graceful cancel-handling for all user input prompts (InputBox/QuickPick).
+- Folder and file existence pre-checks to prevent accidental overwrites.
+- Integration of `logWarning` for non-fatal, UX-friendly alerts.
+
+### Changed
+- Improved user flow for folder creation decisions (Yes/No/Settings-driven).
+- Optimized error and notification behavior for more predictable UX.
+- Centralized validation path to reduce edge-case crashes.
+
+### Fixed
+- Prevented extension crashes during workspace/URI resolution.
+- Fixed handling of QuickPick undefined result that previously caused errors.
+
+### Commit Reference
+- Related to UX & Validation improvements.
+
+
 ## [0.4.0] - 2025-11-21
 
 ### Added
