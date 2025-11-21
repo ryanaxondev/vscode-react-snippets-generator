@@ -29,6 +29,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] - 2025-11-21
+
+### Added
+- Introduced a complete enterprise-level error architecture.
+- Added new custom error classes:
+  - `RCGError` (base error with dual messaging)
+  - `EnvironmentError`
+  - `TemplateError`
+  - `InvalidNameError`
+  - `ComponentExistsError`
+- Implemented `userMessage` system to cleanly separate UX-facing text from technical logs.
+- Extended logger to detect and treat `RCGError` instances with enhanced logging output.
+
+### Changed
+- Major refactor of `extension.ts` to use `throw`-first error control flow.
+- All error paths now use standardized custom error classes for consistency.
+- Replaced scattered `logError()` calls with predictable exception-based flow.
+
+### Fixed
+- Prevented several edge-case failures caused by undefined input or missing workspace.
+- Ensured template and naming validation produce readable UX messages instead of raw errors.
+
+### Commit Reference
+- Covers architectural foundations for error handling.
+
 ## [0.5.0] - 2025-11-21
 
 ### Added
