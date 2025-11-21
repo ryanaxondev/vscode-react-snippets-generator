@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Planned support for workspace-level template overrides.
 - Planned improvements for error handling and output logging.
 - Planned Component Tree Generator feature.
 - Planned Props Builder and Next.js mode.
@@ -30,6 +29,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - N/A
 
 ---
+
+## [0.3.0] - 2025-11-21
+
+### Added
+- **Workspace-level Template Overrides**
+  - Extension now loads templates from the workspace folder `.react-component-generator/` when available.
+  - Fallback mechanism added: if a workspace template does not exist, the built-in template will be used.
+  - Introduced new `templateManager.ts` responsible for template resolution logic.
+
+### Changed
+- Updated component generation flow to use workspace-first template loading.
+- Improved architecture to support future template customization features (Phase C Webview Template Manager).
+
+### Fixed
+- N/A
+
+### Removed
+- N/A
+
+### Security
+- N/A
 
 ## [0.2.0] - 2025-11-21
 
