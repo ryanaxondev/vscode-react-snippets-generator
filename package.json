@@ -7,21 +7,10 @@
   "engines": {
     "vscode": "^1.106.0"
   },
-  "categories": [
-    "Snippets",
-    "Other"
-  ],
-  
+  "categories": ["Snippets", "Other"],
   "icon": "icon.png",
-
   "main": "./out/extension.js",
-  
-  "files": [
-    "out",
-    "snippets",
-    "templates"
-  ],
-
+  "files": ["out", "snippets", "templates"],
   "contributes": {
     "commands": [
       {
@@ -29,6 +18,15 @@
         "title": "Generate React Component"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "rcs.generateComponent",
+          "group": "navigation",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
+    },
     "snippets": [
       {
         "language": "javascriptreact",
@@ -38,7 +36,29 @@
         "language": "typescriptreact",
         "path": "./snippets/react-snippets.json"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "React Component Generator Settings",
+      "properties": {
+        "rcs.useFolder": {
+          "type": "string",
+          "default": "ask",
+          "enum": ["ask", "always", "never"],
+          "description": "Specify whether to create a dedicated folder for the component."
+        },
+        "rcs.defaultStyle": {
+          "type": "string",
+          "default": "ask",
+          "enum": ["ask", "CSS", "SCSS", "Tailwind", "None"],
+          "description": "Sets the default style option. If set to 'ask', a QuickPick menu will appear."
+        },
+        "rcs.defaultTailwindClass": {
+          "type": "string",
+          "default": "container",
+          "description": "The default class name to be used when Tailwind is selected."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -50,6 +70,7 @@
     "typescript": "^5.9.3",
     "@types/node": "^24.10.1",
     "@types/vscode": "^1.106.1",
-    "@vscode/vsce": "^2.15.0" 
-  }
+    "@vscode/vsce": "^2.15.0"
+  },
+  "packageManager": "pnpm@10.23.0+sha512.21c4e5698002ade97e4efe8b8b4a89a8de3c85a37919f957e7a0f30f38fbc5bbdd05980ffe29179b2fb6e6e691242e098d945d1601772cad0fef5fb6411e2a4b"
 }
