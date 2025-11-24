@@ -29,6 +29,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0] - 2025-11-24
+
+### Added
+- Added complete AutoFormat (A5) implementation with Prettier-respecting workflow.
+- Introduced new user setting: `rcs.autoFormat` for enabling/disabling automatic formatting.
+- Added `logWarning` for safer and clearer reporting of formatter failures.
+
+### Improved
+- Wrapped formatter invocation in a dedicated try/catch to prevent flow interruption.
+- Improved stability of document-opening and formatter command execution.
+- Component creation pipeline now fully respects workspace formatter settings.
+
+### Notes
+This release completes all Phase-A core capabilities. The extension is now ready to begin Phase-B feature development.
+
 ## [0.6.0] - 2025-11-21
 
 ### Added

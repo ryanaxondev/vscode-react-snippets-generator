@@ -2,7 +2,7 @@
   "name": "react-component-snippets",
   "displayName": "React Component Snippets + Generator",
   "description": "Snippets and a command to quickly generate React components (CSS, SCSS, Tailwind, Simple).",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "Ryan Carter",
   "engines": {
     "vscode": "^1.106.0"
@@ -56,6 +56,11 @@
           "type": "string",
           "default": "container",
           "description": "The default class name to be used when Tailwind is selected."
+        },
+        "rcs.autoFormat": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically formats the component file after creation using the workspace's default formatter (e.g., Prettier, ESLint). Set to false to disable."
         }
       }
     }

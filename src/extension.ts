@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import { loadTemplate, processTemplate } from './templateManager';
-import { logError, logInfo } from './logger';
+import { logError, logInfo, logWarning } from './logger';
 
 import {
     EnvironmentError,
@@ -57,9 +57,22 @@ export function activate(context: vscode.ExtensionContext) {
             logInfo('Command "rcs.generateComponent" initiated.');
 
             try {
+                // Normalize URI: If user right-clicked a file, use its folder instead of the file itself.
+                if (uri && (await vscode.workspace.fs.stat(uri)).type === vscode.FileType.File) {
+                    uri = vscode.Uri.joinPath(uri, '..');
+                }
+
                 // ---------------------------------------------------
                 // Step 1: Resolve base folder
                 // ---------------------------------------------------
+                // If user right-clicked a FILE instead of a folder, use the parent folder
+                if (uri) {
+                    const stat = await vscode.workspace.fs.stat(uri);
+                    if (stat.type === vscode.FileType.File) {
+                        uri = vscode.Uri.joinPath(uri, '..');
+                    }
+                }
+
                 const baseUri = uri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
 
                 if (!baseUri) {
@@ -250,7 +263,27 @@ export function activate(context: vscode.ExtensionContext) {
                     preserveFocus: false,
                     preview: false
                 });
-                await vscode.commands.executeCommand('editor.action.formatDocument');
+
+                // Attempt to format the newly created document
+                try {
+                    logInfo(`Attempting to format document: ${filename}`);
+
+                    const result = await vscode.commands.executeCommand('editor.action.formatDocument');
+
+                    if (!result) {
+                        logWarning(
+                            'Format command executed but no formatter applied. Check your default formatter settings.'
+                        );
+                    } else {
+                        logInfo('Document formatted successfully.');
+                    }
+                } catch (formatErr) {
+                    logError(
+                        'Automatic formatting failed. The file was created successfully but may require manual formatting.',
+                        formatErr,
+                        true
+                    );
+                }
 
                 vscode.window.showInformationMessage(
                     `Component ${pascalName} created successfully.`
