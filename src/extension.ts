@@ -137,23 +137,32 @@ export function activate(context: vscode.ExtensionContext) {
                     try {
                         await vscode.workspace.fs.stat(folderUri);
                         throw new ComponentExistsError(
-                            `Cannot create component/folder because target already exists.`,
+                            'Cannot create component/folder because target already exists.',
                             'The component folder already exists. Operation cancelled.'
                         );
-                    } catch {
+                    } catch (err: any) {
+                        if (err?.code !== 'FileNotFound' && err?.name !== 'FileNotFoundError') {
+                            throw err;
+                        }
+
                         finalTargetUri = folderUri;
                         await vscode.workspace.fs.createDirectory(finalTargetUri);
                     }
+
                 } else {
                     const componentUri = vscode.Uri.joinPath(finalTargetUri, filename);
 
                     try {
                         await vscode.workspace.fs.stat(componentUri);
                         throw new ComponentExistsError(
-                            `Cannot create file because it already exists.`,
+                            'Cannot create file because it already exists.',
                             'The component file already exists. Operation cancelled.'
                         );
-                    } catch {}
+                    } catch (err: any) {
+                        if (err?.code !== 'FileNotFound' && err?.name !== 'FileNotFoundError') {
+                            throw err;
+                        }
+                    }
                 }
 
                 // ---------------------------------------------------
@@ -187,7 +196,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (styleType === 'Tailwind') {
                     const defaultTW = getConfiguration<string>('defaultTailwindClass');
 
-                    if (defaultStyleSetting === 'Tailwind' && defaultTW === 'ask') {
+                    if (styleType === 'Tailwind' && defaultTW === 'ask') {
                         className =
                             (await vscode.window.showInputBox({
                                 prompt: 'Enter Tailwind class'
@@ -248,7 +257,17 @@ export function activate(context: vscode.ExtensionContext) {
                 );
                 logInfo(`Successfully created component: ${pascalName}.`);
             } catch (err: any) {
-                logError('Component generation encountered a fatal error.', err);
+                if (err instanceof EnvironmentError ||
+                    err instanceof InvalidNameError ||
+                    err instanceof ComponentExistsError) {
+
+                    vscode.window.showErrorMessage(err.userMessage);
+                    logError(err.message, err);
+                    return;
+                }
+
+                vscode.window.showErrorMessage('An unexpected error occurred.');
+                logError('Unexpected fatal error.', err);
             }
         }
     );
