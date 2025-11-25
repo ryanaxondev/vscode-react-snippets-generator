@@ -29,6 +29,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0] - 2025-11-25
+
+### Added
+- Major refactor: generator is now fully modular with dedicated core services:
+  - `configService`, `nameService`, `folderService`, `styleService`, `fileService`, `generationPipeline`
+- Unified, step-by-step **pipeline** for component generation.
+- New `UserCanceledError` for graceful cancel handling.
+- Enhanced `logger.ts` for consistent and non-intrusive logging.
+- Improved `templateManager.ts` with better error handling using `TemplateError`.
+- All component creation logic now fully respects configuration and workspace context.
+
+### Changed
+- Extension activation and `extension.ts` refactored to leverage pipeline and centralized error handling.
+- All previous scattered logic replaced with modular service-based architecture.
+- Input validation, folder/file creation, style handling, and component writing flows improved for clarity and maintainability.
+
+### Fixed
+- Prevented multiple edge-case crashes during workspace resolution, filename validation, or user cancel.
+- Ensured proper error reporting for missing templates or invalid names.
+
+### Notes
+- This release marks **1.0.0**: the extension now has a stable, maintainable architecture and is ready for future Phase-B and Phase-C features like Props Builder and Component Tree Generator.
+
 ## [0.7.0] - 2025-11-24
 
 ### Added

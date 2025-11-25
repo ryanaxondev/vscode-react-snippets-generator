@@ -2,36 +2,19 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { TemplateError } from './errors';
 
-// ---------------------------------------------------------------
-// Workspace template directory
-// Users can override built-in templates by placing files inside:
-//   <workspace>/.react-component-generator/
-// ---------------------------------------------------------------
 const WORKSPACE_TEMPLATES_FOLDER = '.react-component-generator';
 
-// ---------------------------------------------------------------
-// Load template content with workspace-first priority
-// ---------------------------------------------------------------
-/**
- * Loads a template file, giving priority to workspace-level overrides.
- *
- * Resolution order:
- * 1. Workspace templates inside `.react-component-generator/`
- * 2. Built-in extension templates inside `/templates/`
- *
- * @param context       The extension context.
- * @param templateName  Relative template path (e.g. `component.txt`, `styles/css.txt`).
- */
 export async function loadTemplate(
     context: vscode.ExtensionContext,
     templateName: string
 ): Promise<string> {
 
-    // -----------------------------------------------------------
-    // 1. Try loading from workspace override directory
-    // -----------------------------------------------------------
-    if (vscode.workspace.workspaceFolders?.length) {
+    // ---------------------------------------------------------
+    // 1. Try workspace override first
+    // ---------------------------------------------------------
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
         const workspaceRoot = vscode.workspace.workspaceFolders[0].uri;
         const workspaceTemplateUri = vscode.Uri.joinPath(
             workspaceRoot,
@@ -40,42 +23,44 @@ export async function loadTemplate(
         );
 
         try {
-            const content = await vscode.workspace.fs.readFile(workspaceTemplateUri);
-            return new TextDecoder().decode(content); // Workspace override found
-        } catch {
-            // Not found → fall back to built-in templates
+            const bytes = await vscode.workspace.fs.readFile(workspaceTemplateUri);
+            return new TextDecoder().decode(bytes);
+        } catch (error: any) {
+            // Only ignore "file not found" — rethrow all real issues
+            if (
+                error instanceof vscode.FileSystemError &&
+                error.code === 'FileNotFound'
+            ) {
+                // expected → fallback to built-in
+            } else {
+                throw error; // do not hide unexpected filesystem problems
+            }
         }
     }
 
-    // -----------------------------------------------------------
-    // 2. Fallback: Load built-in extension template
-    // -----------------------------------------------------------
-    const extensionTemplatePath = path.join(
-        context.extensionPath,
+    // ---------------------------------------------------------
+    // 2. Fallback to extension built-in templates (safe & cross-platform)
+    // ---------------------------------------------------------
+    const fileUri = vscode.Uri.joinPath(
+        context.extensionUri,
         'templates',
         templateName
     );
 
     try {
-        const fileUri = vscode.Uri.file(extensionTemplatePath);
-        const content = await vscode.workspace.fs.readFile(fileUri);
-        return new TextDecoder().decode(content);
-    } catch {
-        throw new Error(
-            `Could not load template file: ${templateName}. ` +
-            `Checked workspace '${WORKSPACE_TEMPLATES_FOLDER}/' and built-in templates.`
+        const bytes = await vscode.workspace.fs.readFile(fileUri);
+        return new TextDecoder().decode(bytes);
+    } catch (e) {
+        throw new TemplateError(
+            `Could not load template: ${templateName}`,
+            `Template '${templateName}' is missing. Please reinstall the extension or check your workspace templates.`
         );
     }
 }
 
-// ---------------------------------------------------------------
-// Simple template replacement utility
-// ---------------------------------------------------------------
-/**
- * Replaces `{{key}}` placeholders inside template content.
- * @param template      Raw template string.
- * @param replacements  Key-value map for placeholder replacements.
- */
+// ---------------------------------------------------------
+// 3. Template processor
+// ---------------------------------------------------------
 export function processTemplate(
     template: string,
     replacements: { [key: string]: string }
@@ -83,8 +68,10 @@ export function processTemplate(
     let content = template;
 
     for (const key in replacements) {
-        const regex = new RegExp(`{{${key}}}`, 'g');
-        content = content.replace(regex, replacements[key]);
+        if (Object.prototype.hasOwnProperty.call(replacements, key)) {
+            const rx = new RegExp(`{{${key}}}`, 'g');
+            content = content.replace(rx, replacements[key]);
+        }
     }
 
     return content;

@@ -3,17 +3,9 @@
 import * as vscode from 'vscode';
 import { RCGError } from './errors';
 
-/**
- * Name of the output channel used by this extension.
- */
 const OUTPUT_CHANNEL_NAME = 'React Component Generator';
+let channel: vscode.OutputChannel | undefined;
 
-// Holds the OutputChannel instance (Singleton pattern)
-let channel: vscode.OutputChannel;
-
-/**
- * Returns the existing OutputChannel instance or creates a new one.
- */
 function getChannel(): vscode.OutputChannel {
     if (!channel) {
         channel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
@@ -21,53 +13,37 @@ function getChannel(): vscode.OutputChannel {
     return channel;
 }
 
-/**
- * Logs an informational message.
- */
 export function logInfo(message: string): void {
-    const timestamp = new Date().toLocaleTimeString();
-    getChannel().appendLine(`[INFO ${timestamp}] ${message}`);
+    const ts = new Date().toLocaleTimeString();
+    getChannel().appendLine(`[INFO ${ts}] ${message}`);
 }
 
-/**
- * Logs a warning message.
- */
 export function logWarning(message: string): void {
-    const timestamp = new Date().toLocaleTimeString();
-    getChannel().appendLine(`[WARN ${timestamp}] ${message}`);
+    const ts = new Date().toLocaleTimeString();
+    getChannel().appendLine(`[WARN ${ts}] ${message}`);
 }
 
-/**
- * Logs an error message and optionally shows an error notification.
- * Supports RCGError for displaying friendly user-facing messages.
- */
-export function logError(message: string, error?: any, showNotification: boolean = true): void {
-    const timestamp = new Date().toLocaleTimeString();
-    const channel = getChannel();
+export function logError(message: string, error?: unknown, showNotification: boolean = true): void {
+    const ts = new Date().toLocaleTimeString();
+    const ch = getChannel();
 
-    let userDisplayMessage = message;
-
-    channel.appendLine('--------------------------------------------------');
+    let userMsg = message;
+    let errorType = 'StandardError';
 
     if (error instanceof RCGError) {
-        userDisplayMessage = error.userMessage;
-        channel.appendLine(`[ERROR ${timestamp}] Type: ${error.name} | User Message: ${userDisplayMessage}`);
-    } else {
-        channel.appendLine(`[ERROR ${timestamp}] Type: Standard Error | User Message: ${userDisplayMessage}`);
+        userMsg = error.userMessage;
+        errorType = error.name;
     }
+
+    ch.appendLine(`[ERROR ${ts}] Type: ${errorType} | User Message: ${userMsg}`);
 
     if (error) {
-        const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
-        channel.appendLine(`[ERROR DETAILS]: ${errorDetails}`);
+        const details = error instanceof Error ? (error.stack || error.message) : String(error);
+        ch.appendLine(`[ERROR DETAILS] ${details}`);
     }
-
-    channel.appendLine('--------------------------------------------------');
-
-    channel.show(true);
+    ch.appendLine('--------------------------------------------------');
 
     if (showNotification) {
-        vscode.window.showErrorMessage(
-            `RCG Error: ${userDisplayMessage}. See 'React Component Generator' Output channel for technical details.`
-        );
+        vscode.window.showErrorMessage(`RCG Error: ${userMsg}. See '${OUTPUT_CHANNEL_NAME}' Output for details.`);
     }
 }
